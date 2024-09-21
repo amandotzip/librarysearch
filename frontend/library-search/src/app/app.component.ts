@@ -14,40 +14,44 @@ import { NgFor } from '@angular/common'; // Import NgFor directive
 export class AppComponent {
   title = 'library-search';
   searchResults: any[] = [];
+  goodReadsBaseUrl: string = '';
+  goodReadsArgs: string = '';
+  goodReadsResultUrl: string = '';
+  localTesting: boolean = false;
+  searchBooksServiceUrl: string = '';
+  localTestingServiceUrl: string = 'http://localhost:5000/search';
 
   constructor(private http: HttpClient) { }
 
-  stringifyJson(obj: any): string {
-    return JSON.stringify(obj);
+  onBookClick(book: any) {
+    console.log(book);
+    window.open(this.generateLink(book), '_blank');
   }
 
-onBookClick(book: any) {
-  console.log(book);
-  
-
-}
-
+  process_strings_for_url(str1: string, str2: string) {
+      return str1.replace(' ', '+') + '+' + str2.replace(' ', '+');
+  }
+  //makes a goodreads search link
+  private generateLink(book: any) {
+    this.goodReadsBaseUrl = 'https://www.goodreads.com/search?q=';
+    this.goodReadsArgs = this.process_strings_for_url(book.title, book.author);
+    this.goodReadsResultUrl = this.goodReadsBaseUrl + this.goodReadsArgs;
+    return this.goodReadsResultUrl;
+  }
   searchBooksEndpoint() {
     console.debug('Searching books');
 
+    this.localTesting = false;
+
+    if (this.localTesting){
+
+    }
     this.http.get('http://localhost:5000/search')
       .subscribe(response => {
         console.log(response);
         this.searchResults = (response as any);
         console.log('search results');
         console.log(this.searchResults);
-        // const bookButtons = document.getElementById('book-buttons');
-        // if(bookButtons){
-          
-        //   bookButtons.innerHTML = '';
-          
-        //   (response as any).data.forEach(book => {
-        //     const button = document.createElement('button');
-        //     button.textContent = book.title;
-        //     bookButtons.appendChild(button);
-        //   });
-        // }
-
       });
   }
 }
