@@ -45,21 +45,24 @@ def reverse_author_name(author_name):
 
 @app.route('/search', methods=['GET'])
 def search_books():
+    page = request.args.get('page', '1', type=str)
     # book_title = request.args.get('title')
     # if not book_title:
     #     return jsonify({"error": "Book title is required"}), 400
     
     root_url = 'https://mcpl.aspendiscovery.org/Search/Results?join=AND&bool0%5B%5D=OR'
-    favorite_authors = ['Stephen King','Ray Bradbury']
+    favorite_authors = ['Stephen King','Ray Bradbury', 'Yann Martel']
     search_arguments = ''
     for author in favorite_authors:
         cleaned_author = author.lower().replace(' ', '+')
-
         search_arguments += f'&lookfor0%5B%5D={cleaned_author}&type0%5B%5D=Author'
-    books_only_argument = '&filter%5B%5D=format_category%3A%22Books%22'
-    location = '&filter[]=available_at:%22Wheaton%22'
 
-    result_url = root_url + search_arguments + books_only_argument + location
+    books_only_argument = '&filter%5B%5D=format_category%3A%22Books%22'
+    english_only_argument = '&filter[]=language%3A"English"'
+    location = '&filter[]=available_at:%22Wheaton%22'
+    pageNumber = f'&page={page}'
+
+    result_url = root_url + search_arguments + english_only_argument+books_only_argument + location + pageNumber;
     print(result_url)
     # search_url = f"https://mcpl.aspendiscovery.org/Union/Search?view=list&lookfor={book_title}&filter[]=format_category%3A\"Books\""
     response = requests.get(result_url)
