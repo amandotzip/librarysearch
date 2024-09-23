@@ -241,7 +241,31 @@
       <!-- <h1>Hello, {{ title }}</h1> -->
       <br />
 
-      
+      <select id="location-filter" (change)="onLocationChange($event)">
+        <option value="location">Wheaton</option>
+        <option value="location">Aspen Hill</option>
+        <option value="location">Brigadier General Charles E. McGee (Silver Spring)</option>
+        <option value="location">Chevy Chase</option>
+        <option value="location">Connie Morella (Bethesda)</option>
+        <option value="location">Davis (North Bethesda)</option>
+        <option value="location">Damascus</option>
+        <option value="location">Gaithersburg</option>
+        <option value="location">Germantown</option>
+        <option value="location">Kensington Park</option>
+        <option value="location">Little Falls</option>
+        <option value="location">Long Branch</option>
+        <option value="location">Maggie Nightingale (Poolesville)</option>
+        <option value="location">Marilyn J. Praisner (Burtonsville)</option>
+        <option value="location">Olney</option>
+        <option value="location">Potomac</option>
+        <option value="location">Quince Orchard</option>
+        <option value="location">Rockville Memorial</option>
+        <option value="location">Twinbrook</option>
+        <option value="location">White Oak</option>
+
+        <!-- <option value="title">Title</option> -->
+        <!-- <option value="author">Author</option> -->
+      </select>
       <div class="search-results">
         <h1>Local Library Search</h1>
         
@@ -255,9 +279,13 @@
 
           <li *ngFor="let book of searchResults" (click)="onBookClick(book)">
             <div class="search-result">
-              {{ book.title }}
+              <b>{{ book.title }} </b>
               <br />
               {{ book.author }}
+              <br />
+
+              {{ book.call_number }}
+
             </div>
           </li>
         </ul>

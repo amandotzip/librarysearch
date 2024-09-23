@@ -43,15 +43,17 @@ def reverse_author_name(author_name):
     names = author_name.split(', ')
     return ' '.join(reversed(names))
 
+
+def get_text_between_br_tags(html_string):
+    return str(html_string.find('span')).split('<br/>')[1].strip()
 @app.route('/search', methods=['GET'])
 def search_books():
+    print('Entering search_books()')
     page = request.args.get('page', '1', type=str)
-    # book_title = request.args.get('title')
-    # if not book_title:
-    #     return jsonify({"error": "Book title is required"}), 400
+    location = request.args.get('location', '', type=str)
     
     root_url = 'https://mcpl.aspendiscovery.org/Search/Results?join=AND&bool0%5B%5D=OR'
-    favorite_authors = ['Stephen King','Ray Bradbury', 'Yann Martel']
+    favorite_authors = ['Stephen King','Ray Bradbury', 'Yann Martel', 'Lev Grossman', 'Douglas Adams']
     search_arguments = ''
     for author in favorite_authors:
         cleaned_author = author.lower().replace(' ', '+')
@@ -59,12 +61,16 @@ def search_books():
 
     books_only_argument = '&filter%5B%5D=format_category%3A%22Books%22'
     english_only_argument = '&filter[]=language%3A"English"'
-    location = '&filter[]=available_at:%22Wheaton%22'
-    pageNumber = f'&page={page}'
 
-    result_url = root_url + search_arguments + english_only_argument+books_only_argument + location + pageNumber;
+    locationArg = '&filter[]=available_at:'
+    location = location.replace(' ', '+')
+    locationArg += location
+
+    pageNumber = f'&page={page}'
+   
+    result_url = root_url + search_arguments + english_only_argument+books_only_argument + locationArg + pageNumber;
     print(result_url)
-    # search_url = f"https://mcpl.aspendiscovery.org/Union/Search?view=list&lookfor={book_title}&filter[]=format_category%3A\"Books\""
+    
     response = requests.get(result_url)
     soup = BeautifulSoup(response.content, 'html.parser')
 
@@ -72,26 +78,29 @@ def search_books():
     books = []
     book_items = soup.find_all(class_=re.compile(r'result\s+(?:alt\s+)?record\d+')) #use regex for record numbers in website
     for book in book_items:
-        # title = book.find('h2', class_='title').text
-        # title = soup.find('a', class_='result-title notranslate')
         title = book.find('a', class_='result-title notranslate').text
-        # title = soup.find('a', class_='result-title notranslate').text
-        # print(title)  # Output: The_hobbit__or__There_and_back_again
         
+        location_div = book.find('div', class_='itemLocationDetails')
+
+
+        # Extract text after the first <br/>
+        text = str(location_div.find('span')).split('<br/>')[1].strip()
+
+        print(text)  # Output: F MAR
+
+
+        print(location_div)
+        call_number = get_text_between_br_tags(location_div)
+        # print(call_number)
+
         author_soup = book.find('div', class_='result-value').find('a')
         author = ''
         if author_soup is not None: #some books don't have a single main author (collections)
             author = author_soup.text
-        # print(author)  # Output: The_hobbit__or__There_and_back_again
-
-        # open_library_search_results = open_library_search(title)
-        # print(open_library_search_results)
-        # author = open_library_search_results['docs'][00]['author_name']
-        # availability = book.find('span', class_='availability').text
         author = reverse_author_name(author)
         title = title.removesuffix(': a novel') #mcpl adds this but it isnt anywhere else like goodreads
 
-        books.append({"title": title, "author": author})
+        books.append({"title": title, "author": author, "call_number": call_number})
         # print(books)
     
     return jsonify(books)

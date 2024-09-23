@@ -23,6 +23,7 @@ export class AppComponent {
   localTestingServiceUrl: string = 'http://localhost:4000/search';
   serviceUrl: string = '';
   currentPage: number = 1;
+  locationFilter: string = 'Wheaton';
 
   constructor(private http: HttpClient) { }
 
@@ -32,10 +33,6 @@ export class AppComponent {
   }
 
   process_strings_for_url(str1: string, str2: string) {
-      console.log(str1);
-      // console.log(str1.replaceAll(' ', '+'));
-      console.log(str2);
-  
       return str1.replaceAll(' ', '+') + '+' + str2.replaceAll(' ', '+');
   }
   //makes a goodreads search link
@@ -45,11 +42,24 @@ export class AppComponent {
     console.log(this.goodReadsArgs);
     this.goodReadsResultUrl = this.goodReadsBaseUrl + this.goodReadsArgs;
     console.log(this.goodReadsResultUrl);
-    return `<a href="${this.goodReadsResultUrl}">Open in Goodreads</a>`;
-    // return this.goodReadsResultUrl;
+    // return `<a href="${this.goodReadsResultUrl}">Open in Goodreads</a>`;
+    // return `<a href="${this.goodReadsResultUrl}">Open in Goodreads</a>`;
+    return this.goodReadsResultUrl;
   }
+
+
+  onLocationChange(event: Event){
+    const selectElement = event.target as HTMLSelectElement;
+    this.locationFilter = selectElement.options[selectElement.selectedIndex].text;
+    console.log(this.locationFilter);
+  }
+
   searchBooksEndpoint(page: number = 1) {
     console.debug('Searching books');
+    // this.locationFilter = document.getElementById("location-filter");
+    
+
+
     //use local testing url when debugging
     if (this.localTesting){
       this.serviceUrl = this.localTestingServiceUrl;
@@ -58,7 +68,9 @@ export class AppComponent {
     }
     let params = new HttpParams();
     params = params.append('page', page.toString());
-    console.log(this.serviceUrl);
+    params = params.append('location', this.locationFilter);
+    console.log(params)
+    
     this.http.get(this.serviceUrl , { params: params })
       .subscribe(response => {
         console.log(response);
