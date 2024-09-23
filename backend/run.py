@@ -79,29 +79,20 @@ def search_books():
     book_items = soup.find_all(class_=re.compile(r'result\s+(?:alt\s+)?record\d+')) #use regex for record numbers in website
     for book in book_items:
         title = book.find('a', class_='result-title notranslate').text
+        title = title.removesuffix(': a novel') #mcpl adds this but it isnt anywhere else like goodreads
         
-        location_div = book.find('div', class_='itemLocationDetails')
-
-
-        # Extract text after the first <br/>
-        text = str(location_div.find('span')).split('<br/>')[1].strip()
-
-        print(text)  # Output: F MAR
-
-
-        print(location_div)
-        call_number = get_text_between_br_tags(location_div)
-        # print(call_number)
+        call_number_soup = book.find('div', class_='itemLocationDetails')
+        call_number = get_text_between_br_tags(call_number_soup)
 
         author_soup = book.find('div', class_='result-value').find('a')
         author = ''
         if author_soup is not None: #some books don't have a single main author (collections)
             author = author_soup.text
-        author = reverse_author_name(author)
-        title = title.removesuffix(': a novel') #mcpl adds this but it isnt anywhere else like goodreads
+            author = reverse_author_name(author)
+        else:
+            author = 'Multiple Authors'
 
         books.append({"title": title, "author": author, "call_number": call_number})
-        # print(books)
     
     return jsonify(books)
 
